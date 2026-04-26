@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库 - 个人文档管理</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.0.2">
+    <link rel="stylesheet" href="styles/components.css?v=1.0.2">
+    <link rel="stylesheet" href="styles/analyzer.css?v=1.0.2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="切换侧边栏">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1 class="logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <span>知识库</span>
+                </h1>
+            </div>
+            <div class="header-center">
+                <div class="search-box">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="搜索标题、内容、标签..." autocomplete="off">
+                    <button class="search-filter-btn" id="searchFilterBtn" title="高级筛选">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                    </button>
+                    <div class="search-results-count" id="searchResultsCount"></div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="themeToggle" title="切换主题">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="importBtn" title="导入数据">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="exportBtn" title="导出数据">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+                <button class="btn btn-secondary" id="analyzerBtn" title="项目分析器">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                        <path d="M11 8v6"></path>
+                        <path d="M8 11h6"></path>
+                    </svg>
+                    <span>项目分析</span>
+                </button>
+                <button class="btn btn-primary" id="addContentBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>添加内容</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 左侧边栏 -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="sidebar-nav">
+                    <!-- 快捷入口 -->
+                    <div class="nav-section">
+                        <div class="nav-item active" data-view="all">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span>全部内容</span>
+                            <span class="nav-count" id="countAll">0</span>
+                        </div>
+                        <div class="nav-item" data-view="documents">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span>文档</span>
+                            <span class="nav-count" id="countDocs">0</span>
+                        </div>
+                        <div class="nav-item" data-view="bookmarks">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>网页收藏</span>
+                            <span class="nav-count" id="countBookmarks">0</span>
+                        </div>
+                        <div class="nav-item" data-view="notes">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <span>独立笔记</span>
+                            <span class="nav-count" id="countNotes">0</span>
+                        </div>
+                    </div>
+
+                    <!-- 时间分类 -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>时间分类</span>
+                        </div>
+                        <div class="nav-item" data-view="today">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>今天</span>
+                            <span class="nav-count" id="countToday">0</span>
+                        </div>
+                        <div class="nav-item" data-view="week">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>本周</span>
+                            <span class="nav-count" id="countWeek">0</span>
+                        </div>
+                        <div class="nav-item" data-view="month">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>本月</span>
+                            <span class="nav-count" id="countMonth">0</span>
+                        </div>
+                        <div class="nav-item" data-view="older">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                            <span>更早</span>
+                            <span class="nav-count" id="countOlder">0</span>
+                        </div>
+                    </div>
+
+                    <!-- 收藏夹 -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>收藏夹</span>
+                            <button class="btn-add" id="addFolderBtn" title="新建收藏夹">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="folder-list" id="folderList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 标签 -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                            <span>标签</span>
+                            <button class="btn-add" id="addTagBtn" title="新建标签">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="tag-list" id="tagList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- 存储信息 -->
+                <div class="storage-info" id="storageInfo">
+                    <div class="storage-bar">
+                        <div class="storage-used" id="storageUsed" style="width: 0%"></div>
+                    </div>
+                    <span class="storage-text">已使用 <span id="storageSize">0 KB</span></span>
+                </div>
+            </aside>
+
+            <!-- 中间内容列表 -->
+            <section class="content-list" id="contentList">
+                <div class="content-list-header">
+                    <h2 class="content-list-title" id="currentViewTitle">全部内容</h2>
+                    <div class="content-list-actions">
+                        <select class="sort-select" id="sortSelect">
+                            <option value="updated">最近修改</option>
+                            <option value="created">创建时间</option>
+                            <option value="title">标题</option>
+                        </select>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid" title="网格视图">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                            </button>
+                            <button class="view-btn" data-view="list" title="列表视图">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-list-body" id="contentListBody">
+                    <!-- 空状态 -->
+                    <div class="empty-state" id="emptyState">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        <h3>暂无内容</h3>
+                        <p>开始添加文档或收藏网页吧</p>
+                        <div class="empty-actions">
+                            <button class="btn btn-primary" id="emptyAddDoc">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                                上传文档
+                            </button>
+                            <button class="btn btn-secondary" id="emptyAddBookmark">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                收藏网页
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 内容卡片列表 -->
+                    <div class="content-grid" id="contentGrid">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧预览面板 -->
+            <section class="preview-panel" id="previewPanel">
+                <div class="preview-header">
+                    <div class="preview-actions">
+                        <button class="btn-icon" id="expandBtn" title="展开/收起">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="editBtn" title="编辑">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="moveBtn" title="移动到收藏夹">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="tagManageBtn" title="管理标签">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="deleteBtn" title="删除">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" id="closePreviewBtn" title="关闭">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="preview-content" id="previewContent">
+                    <div class="preview-placeholder">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <p>选择一项内容查看预览</p>
+                    </div>
+                </div>
+                <!-- 笔记区域 -->
+                <div class="notes-section" id="notesSection">
+                    <div class="notes-header">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            笔记
+                        </h3>
+                        <button class="btn-icon" id="addNoteBtn" title="添加笔记">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="notes-list" id="notesList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 模态框 -->
+        <!-- 添加内容模态框 -->
+        <div class="modal" id="addContentModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>添加内容</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-content-tabs">
+                        <button class="tab-btn active" data-tab="upload">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            上传文档
+                        </button>
+                        <button class="tab-btn" data-tab="bookmark">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            收藏网页
+                        </button>
+                        <button class="tab-btn" data-tab="note">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            创建笔记
+                        </button>
+                    </div>
+                    
+                    <!-- 上传文档面板 -->
+                    <div class="tab-panel active" id="uploadPanel">
+                        <div class="upload-zone" id="uploadZone">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p>拖拽文件到此处，或<button class="link-btn" id="selectFileBtn">选择文件</button></p>
+                            <span class="upload-hint">支持 .md 和 .html 文件</span>
+                            <input type="file" id="fileInput" accept=".md,.html,.htm" multiple hidden>
+                        </div>
+                        <div class="upload-list" id="uploadList"></div>
+                    </div>
+                    
+                    <!-- 收藏网页面板 -->
+                    <div class="tab-panel" id="bookmarkPanel">
+                        <div class="form-group">
+                            <label for="bookmarkUrl">网页 URL</label>
+                            <input type="url" id="bookmarkUrl" placeholder="https://example.com/article">
+                        </div>
+                        <div class="cors-setting">
+                            <label>
+                                <input type="checkbox" id="useCorsProxy">
+                                使用 CORS 代理（解决跨域问题）
+                            </label>
+                            <select id="corsProxySelect" class="cors-proxy-select">
+                                <option value="cors-anywhere">cors-anywhere (免费)</option>
+                                <option value="allorigins">allorigins (免费)</option>
+                                <option value="custom">自定义代理</option>
+                            </select>
+                            <input type="url" id="customCorsProxy" placeholder="https://your-proxy.com" class="custom-proxy-input hidden">
+                        </div>
+                        <button class="btn btn-primary btn-block" id="fetchUrlBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                            获取网页内容
+                        </button>
+                        <div class="fetch-status" id="fetchStatus"></div>
+                    </div>
+                    
+                    <!-- 创建笔记面板 -->
+                    <div class="tab-panel" id="notePanel">
+                        <div class="form-group">
+                            <label for="noteTitle">标题</label>
+                            <input type="text" id="noteTitle" placeholder="笔记标题">
+                        </div>
+                        <div class="form-group">
+                            <label for="noteContent">内容 (Markdown)</label>
+                            <textarea id="noteContent" placeholder="使用 Markdown 编写笔记内容..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="noteTags">标签</label>
+                            <div class="tag-input-wrapper" id="noteTagInput">
+                                <div class="selected-tags" id="noteSelectedTags"></div>
+                                <input type="text" id="noteTags" placeholder="输入标签名后按回车添加">
+                            </div>
+                            <div class="available-tags" id="noteAvailableTags"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 通用设置 -->
+                    <div class="common-settings">
+                        <div class="form-group">
+                            <label for="contentFolder">收藏夹（可选）</label>
+                            <select id="contentFolder">
+                                <option value="">无</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-primary" id="saveContentBtn">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑模态框 -->
+        <div class="modal" id="editModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h2 id="editModalTitle">编辑内容</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editTitle">标题</label>
+                        <input type="text" id="editTitle" placeholder="内容标题">
+                    </div>
+                    <div class="editor-container">
+                        <div class="editor-toolbar" id="editorToolbar">
+                            <button class="toolbar-btn" data-action="bold" title="粗体">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                                    <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="italic" title="斜体">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="19" y1="4" x2="10" y2="4"></line>
+                                    <line x1="14" y1="20" x2="5" y2="20"></line>
+                                    <line x1="15" y1="4" x2="9" y2="20"></line>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="heading" title="标题">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 12h12"></path>
+                                    <path d="M6 4v16"></path>
+                                    <path d="M18 4v16"></path>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="link" title="链接">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="code" title="代码">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="quote" title="引用">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"></path>
+                                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"></path>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="list" title="列表">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                            </button>
+                            <button class="toolbar-btn" data-action="image" title="图片">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </button>
+                            <div class="toolbar-separator"></div>
+                            <button class="toolbar-btn" data-action="preview" title="预览" id="togglePreview">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="editor-wrapper">
+                            <textarea id="editContent" class="editor-textarea" placeholder="使用 Markdown 编辑内容..."></textarea>
+                            <div class="editor-preview markdown-body" id="editorPreview" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-primary" id="saveEditBtn">保存修改</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 笔记编辑模态框 -->
+        <div class="modal" id="noteEditModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-medium">
+                <div class="modal-header">
+                    <h2 id="noteEditModalTitle">添加笔记</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="noteEditTitle">标题</label>
+                        <input type="text" id="noteEditTitle" placeholder="笔记标题">
+                    </div>
+                    <div class="form-group">
+                        <label for="noteEditContent">内容 (Markdown)</label>
+                        <textarea id="noteEditContent" class="note-editor" placeholder="使用 Markdown 编写..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-primary" id="saveNoteBtn">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索筛选模态框 -->
+        <div class="modal" id="searchFilterModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>高级筛选</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>标签</label>
+                        <div class="filter-tags" id="filterTags"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>时间范围</label>
+                        <div class="date-range">
+                            <input type="date" id="filterDateFrom" placeholder="开始日期">
+                            <span>至</span>
+                            <input type="date" id="filterDateTo" placeholder="结束日期">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>内容类型</label>
+                        <div class="filter-checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="document" checked> 文档
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="bookmark" checked> 网页
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="note" checked> 笔记
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="clearFilterBtn">清除筛选</button>
+                    <button class="btn btn-primary" id="applyFilterBtn">应用筛选</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件夹管理模态框 -->
+        <div class="modal" id="folderModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>管理收藏夹</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newFolderName">新建收藏夹</label>
+                        <div class="input-with-button">
+                            <input type="text" id="newFolderName" placeholder="收藏夹名称">
+                            <button class="btn btn-primary" id="createFolderBtn">创建</button>
+                        </div>
+                    </div>
+                    <div class="folder-list-manage" id="folderListManage">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签管理模态框 -->
+        <div class="modal" id="tagModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>管理标签</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newTagName">新建标签</label>
+                        <div class="input-with-button">
+                            <input type="text" id="newTagName" placeholder="标签名称">
+                            <input type="color" id="newTagColor" value="#3b82f6" class="tag-color-picker">
+                            <button class="btn btn-primary" id="createTagBtn">创建</button>
+                        </div>
+                    </div>
+                    <div class="tag-list-manage" id="tagListManage">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动到收藏夹模态框 -->
+        <div class="modal" id="moveModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>移动到收藏夹</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="removeFromFolder">
+                            从当前收藏夹移除
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetFolder">选择收藏夹</label>
+                        <select id="targetFolder">
+                            <option value="">无</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-primary" id="confirmMoveBtn">移动</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容标签管理模态框 -->
+        <div class="modal" id="contentTagModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>管理标签</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>已选标签</label>
+                        <div class="content-tags-edit" id="contentTagsEdit"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>添加标签</label>
+                        <div class="available-content-tags" id="availableContentTags"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-primary" id="saveContentTagsBtn">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 确认删除模态框 -->
+        <div class="modal" id="confirmModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-tiny">
+                <div class="modal-header">
+                    <h2>确认删除</h2>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">确定要删除此项吗？此操作无法撤销。</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">取消</button>
+                    <button class="btn btn-danger" id="confirmDeleteBtn">删除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast 通知 -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <!-- 项目分析器模态框 -->
+    <div class="modal analyzer-modal" id="analyzerModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 项目分析器</h2>
+                <div class="modal-header-actions">
+                    <div class="ai-status" id="aiStatus" title="点击配置 AI">
+                        <span class="ai-status-dot unconfigured"></span>
+                        AI 未配置
+                    </div>
+                    <button class="btn-icon modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- 上传区域 -->
+                <div class="analyzer-upload">
+                    <div class="analyzer-drop-zone" id="analyzerDropZone">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>拖拽项目文件夹或压缩包到此处，或<button class="link-btn" type="button">点击选择</button></p>
+                        <span class="upload-hint">支持文件夹、.zip 压缩包</span>
+                        <input type="file" id="analyzerFileInput" webkitdirectory multiple hidden>
+                    </div>
+                    <div class="analyzer-file-list" id="analyzerFileList"></div>
+                </div>
+                
+                <!-- 分析进度 -->
+                <div class="analyzer-progress hidden" id="analyzerProgress">
+                    <div class="analyzer-progress-bar">
+                        <div class="analyzer-progress-fill" id="analyzerProgressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="analyzer-progress-text" id="analyzerProgressText">准备中...</div>
+                </div>
+                
+                <!-- 分析结果 -->
+                <div class="analyzer-result hidden" id="analysisResult"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="resetAnalyzerBtn">重置</button>
+                <button class="btn btn-primary" id="analyzeBtn" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    开始分析
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 配置模态框 -->
+    <div class="modal ai-config-modal" id="aiConfigModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🤖 AI 配置</h2>
+                <button class="btn-icon modal-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="ai-config-form" id="aiConfigForm"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件上传区域（用于拖放） -->
+    <div class="drop-overlay" id="dropOverlay">
+        <div class="drop-content">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p>释放文件以上传</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <script src="scripts/db.js?v=1.0.2"></script>
+    <script src="scripts/utils.js?v=1.0.2"></script>
+    <script src="scripts/scraper.js?v=1.0.2"></script>
+    <script src="scripts/renderer.v2.js?v=1.0.2"></script>
+    <script src="scripts/analyzer/analyzer.js?v=1.0.2"></script>
+    <script src="scripts/analyzer/parser-java.js?v=1.0.2"></script>
+    <script src="scripts/analyzer/parser-js.js?v=1.0.2"></script>
+    <script src="scripts/analyzer/ai-service.js?v=1.0.2"></script>
+    <script src="scripts/analyzer/ui.js?v=1.0.2"></script>
+    <script src="scripts/app.js?v=1.0.2"></script>
+</body>
+</html>

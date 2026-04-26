@@ -1,0 +1,19 @@
+{
+  "name": "knowledge-base-proxy",
+  "version": "1.0.0",
+  "description": "CORS proxy for Knowledge Base web scraper",
+  "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js",
+    "dev": "node proxy.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

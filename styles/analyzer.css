@@ -1,0 +1,524 @@
+/**
+ * 项目分析器样式
+ */
+
+/* ===== 分析器模态框 ===== */
+.analyzer-modal {
+    max-width: 900px;
+    width: 95%;
+}
+
+.analyzer-modal .modal-content {
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.analyzer-modal .modal-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.analyzer-modal .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===== 上传区域 ===== */
+.analyzer-upload {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.analyzer-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--bg-secondary);
+}
+
+.analyzer-drop-zone:hover,
+.analyzer-drop-zone.dragover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.analyzer-drop-zone svg {
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+}
+
+.analyzer-drop-zone p {
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.analyzer-drop-zone .upload-hint {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+}
+
+.analyzer-drop-zone .link-btn {
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.analyzer-drop-zone .link-btn:hover {
+    text-decoration: underline;
+}
+
+/* ===== 文件列表 ===== */
+.analyzer-file-list {
+    margin-top: 16px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.file-list-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    position: sticky;
+    top: 0;
+}
+
+.file-list-items {
+    padding: 8px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+}
+
+.file-item:hover {
+    background: var(--bg-hover);
+    border-radius: var(--radius-sm);
+}
+
+.file-icon {
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+.file-path {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-more {
+    text-align: center;
+    padding: 8px;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+}
+
+/* ===== 分析面板 ===== */
+.analyzer-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.analyzer-progress {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.analyzer-progress-bar {
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.analyzer-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width var(--transition-normal);
+}
+
+.analyzer-progress-text {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ===== 分析结果 ===== */
+.analyzer-result {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.analysis-info h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+}
+
+.analysis-meta {
+    display: flex;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.analysis-meta .badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+}
+
+.analysis-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.analysis-content {
+    display: flex;
+    gap: 24px;
+}
+
+.analysis-markdown {
+    flex: 1;
+    min-width: 0;
+}
+
+.analysis-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border-color);
+    padding-left: 24px;
+}
+
+.sidebar-section {
+    margin-bottom: 24px;
+}
+
+.sidebar-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+/* ===== 项目树 ===== */
+.project-tree {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.tree-item.depth-1 { padding-left: 16px; }
+.tree-item.depth-2 { padding-left: 32px; }
+.tree-item.depth-3 { padding-left: 48px; }
+
+.tree-icon {
+    margin-right: 6px;
+}
+
+.tree-name {
+    color: var(--text-primary);
+}
+
+.tree-children {
+    margin-left: 8px;
+}
+
+.tree-more {
+    padding-left: 32px;
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* ===== Mermaid 图 ===== */
+.mermaid {
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    overflow-x: auto;
+}
+
+/* ===== AI 配置 ===== */
+.ai-config-modal .modal-content {
+    max-width: 500px;
+}
+
+.ai-config-form .form-group {
+    margin-bottom: 16px;
+}
+
+.ai-config-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.ai-config-form .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.ai-config-form .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.ai-config-form .form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.ai-config-form .btn {
+    margin-top: 16px;
+    margin-right: 8px;
+}
+
+/* ===== AI 状态指示器 ===== */
+.ai-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.ai-status:hover {
+    background: var(--bg-hover);
+}
+
+.ai-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.ai-status-dot.configured {
+    background: var(--success);
+}
+
+.ai-status-dot.unconfigured {
+    background: var(--warning);
+}
+
+/* ===== 进度指示器 ===== */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== 按钮增强 ===== */
+.btn .spinner {
+    margin-right: 8px;
+}
+
+/* ===== Markdown 样式增强 ===== */
+.analysis-markdown .markdown-body {
+    line-height: 1.7;
+}
+
+.analysis-markdown h1 {
+    font-size: 1.75rem;
+    margin-top: 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.analysis-markdown h2 {
+    font-size: 1.375rem;
+    margin-top: 32px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.analysis-markdown h3 {
+    font-size: 1.125rem;
+    margin-top: 24px;
+}
+
+.analysis-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.analysis-markdown th,
+.analysis-markdown td {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.analysis-markdown th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+}
+
+.analysis-markdown code {
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+}
+
+.analysis-markdown pre {
+    background: var(--bg-tertiary);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+}
+
+.analysis-markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+.analysis-markdown blockquote {
+    border-left: 4px solid var(--primary);
+    margin: 16px 0;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+/* ===== 空状态 ===== */
+.analyzer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+.analyzer-empty svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.analyzer-empty h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-secondary);
+}
+
+.analyzer-empty p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .analyzer-modal {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+    }
+    
+    .analyzer-modal .modal-content {
+        max-height: none;
+        height: 100%;
+        border-radius: 0;
+    }
+    
+    .analysis-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .analysis-actions {
+        width: 100%;
+    }
+    
+    .analysis-actions .btn {
+        flex: 1;
+    }
+    
+    .analysis-content {
+        flex-direction: column;
+    }
+    
+    .analysis-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        padding-left: 0;
+        padding-top: 16px;
+    }
+}
+
+/* ===== 暗色主题适配 ===== */
+[data-theme="dark"] .analyzer-drop-zone.dragover {
+    background: var(--primary-dark);
+}
+
+[data-theme="dark"] .analysis-markdown code {
+    background: var(--bg-tertiary);
+}
