@@ -3,64 +3,52 @@
  * 处理URL内容的抓取和解析
  */
 
-// CORS代理配置
-const CORS_PROXIES = {
-    'cors-anywhere': (url) => `https://cors-anywhere.herokuapp.com/${url}`,
-    'allorigins': (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    'corsproxy': (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-};
+// CORS代理配置 - 按优先级排序
+const CORS_PROXIES = [
+    { name: 'allorigins', fn: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+    { name: 'corsproxy', fn: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}` },
+    { name: 'cors-anywhere', fn: (url) => `https://cors-anywhere.herokuapp.com/${url}` }
+];
 
 /**
  * 网页抓取器类
  */
 class WebScraper {
     constructor() {
-        this.defaultProxy = 'allorigins';
+        this.currentProxyIndex = 0;
     }
 
     /**
      * 获取CORS代理URL
      */
-    getProxyUrl(originalUrl, proxyType = null) {
-        const proxy = proxyType || this.defaultProxy;
-        if (proxy === 'custom') {
-            return null; // 使用用户自定义代理
+    getProxyUrl(originalUrl, proxyIndex = 0) {
+        if (proxyIndex >= 0 && proxyIndex < CORS_PROXIES.length) {
+            return CORS_PROXIES[proxyIndex].fn(originalUrl);
         }
-        
-        const proxyFn = CORS_PROXIES[proxy];
-        if (proxyFn) {
-            return proxyFn(originalUrl);
-        }
-        
         return null;
     }
 
     /**
-     * 抓取网页内容
+     * 单次抓取尝试
      */
-    async fetchPage(url, options = {}) {
+    async fetchOnce(url, options = {}) {
         const { 
             useProxy = true, 
-            proxyType = null,
+            proxyIndex = 0,
             customProxyUrl = null,
-            timeout = 30000 
+            timeout = 15000 
         } = options;
-
-        // 验证URL
-        if (!utils.isValidUrl(url)) {
-            throw new Error('无效的URL格式');
-        }
 
         let fetchUrl = url;
         let usedProxy = false;
 
         // 如果使用代理
         if (useProxy) {
-            if (proxyType === 'custom' && customProxyUrl) {
+            if (customProxyUrl) {
                 fetchUrl = `${customProxyUrl}${customProxyUrl.endsWith('/') ? '' : '/'}${encodeURIComponent(url)}`;
                 usedProxy = true;
             } else {
-                const proxyUrl = this.getProxyUrl(url, proxyType);
+                const proxyUrl = this.getProxyUrl(url, proxyIndex);
                 if (proxyUrl) {
                     fetchUrl = proxyUrl;
                     usedProxy = true;
@@ -91,16 +79,15 @@ class WebScraper {
             
             // 如果使用了代理，可能需要处理相对URL
             if (usedProxy) {
-                // 确保HTML中的相对链接可以正常工作
                 const baseTag = `<base href="${new URL(url).origin}">`;
                 if (!html.includes('<base')) {
-                    // 在<head>标签后添加base标签
                     const headMatch = html.match(/<head([^>]*)>/i);
                     if (headMatch) {
                         const insertPos = headMatch.index + headMatch[0].length;
                         return {
                             html: html.slice(0, insertPos) + baseTag + html.slice(insertPos),
                             usedProxy,
+                            proxyIndex,
                             originalUrl: url
                         };
                     }
@@ -110,18 +97,73 @@ class WebScraper {
             return {
                 html,
                 usedProxy,
+                proxyIndex,
                 originalUrl: url
             };
 
         } catch (error) {
             clearTimeout(timeoutId);
-            
-            if (error.name === 'AbortError') {
-                throw new Error('请求超时，请稍后重试');
-            }
-            
             throw error;
         }
+    }
+
+    /**
+     * 抓取网页内容 - 自动重试多个代理
+     */
+    async fetchPage(url, options = {}) {
+        const { 
+            useProxy = true, 
+            customProxyUrl = null,
+            maxRetries = 3
+        } = options;
+
+        // 验证URL
+        if (!utils.isValidUrl(url)) {
+            throw new Error('无效的URL格式');
+        }
+
+        // 如果有自定义代理，直接使用
+        if (customProxyUrl) {
+            try {
+                return await this.fetchOnce(url, { ...options, customProxyUrl, timeout: 30000 });
+            } catch (error) {
+                throw new Error(`获取失败：${error.message}`);
+            }
+        }
+
+        // 不使用代理的情况
+        if (!useProxy) {
+            try {
+                return await this.fetchOnce(url, { ...options, useProxy: false, timeout: 30000 });
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('请求超时，请稍后重试');
+                }
+                throw error;
+            }
+        }
+
+        // 使用代理自动重试
+        const errors = [];
+        for (let i = 0; i < Math.min(maxRetries, CORS_PROXIES.length); i++) {
+            const proxyIndex = (this.currentProxyIndex + i) % CORS_PROXIES.length;
+            try {
+                console.log(`尝试代理 ${CORS_PROXIES[proxyIndex].name}...`);
+                const result = await this.fetchOnce(url, { ...options, proxyIndex });
+                // 成功后更新默认代理索引
+                this.currentProxyIndex = proxyIndex;
+                console.log(`代理 ${CORS_PROXIES[proxyIndex].name} 成功`);
+                return result;
+            } catch (error) {
+                const proxyName = CORS_PROXIES[proxyIndex].name;
+                const errorMsg = error.name === 'AbortError' ? '超时' : error.message;
+                console.warn(`代理 ${proxyName} 失败: ${errorMsg}`);
+                errors.push(`${proxyName}: ${errorMsg}`);
+            }
+        }
+
+        // 所有代理都失败
+        throw new Error(`获取失败：所有代理均不可用，请稍后重试`);
     }
 
     /**
