@@ -991,3 +991,38 @@ select {
 [data-theme="dark"] .quick-edit-btn:hover {
     background: var(--bg-hover);
 }
+
+
+/* 网页收藏模式切换 */
+.bookmark-mode-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+}
+
+.bookmark-mode-switch .link-btn {
+    color: var(--primary);
+    font-size: 0.875rem;
+}
+
+.bookmark-mode-switch .link-btn:hover {
+    text-decoration: underline;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}

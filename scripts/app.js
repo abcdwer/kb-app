@@ -380,18 +380,50 @@ class KnowledgeBaseApp {
         // 抓取网页
         document.getElementById('fetchUrlBtn').addEventListener('click', () => this.fetchUrl());
 
-        // CORS代理选择
-        document.getElementById('useCorsProxy').addEventListener('change', (e) => {
-            document.getElementById('corsProxySelect').disabled = !e.target.checked;
+        // 切换到手动输入模式
+        document.getElementById('switchToManualBtn').addEventListener('click', () => {
+            const url = document.getElementById('bookmarkUrl').value.trim();
+            document.getElementById('manualBookmarkUrl').value = url;
+            document.getElementById('autoFetchMode').classList.add('hidden');
+            document.getElementById('manualInputMode').classList.remove('hidden');
         });
 
-        document.getElementById('corsProxySelect').addEventListener('change', (e) => {
-            const customInput = document.getElementById('customCorsProxy');
-            if (e.target.value === 'custom') {
-                customInput.classList.remove('hidden');
-            } else {
-                customInput.classList.add('hidden');
+        // 返回自动获取模式
+        document.getElementById('backToAutoFetch').addEventListener('click', () => {
+            document.getElementById('manualInputMode').classList.add('hidden');
+            document.getElementById('autoFetchMode').classList.remove('hidden');
+        });
+
+        // 仅保存链接
+        document.getElementById('saveLinkOnlyBtn').addEventListener('click', () => {
+            const url = document.getElementById('bookmarkUrl').value.trim();
+            if (!url) {
+                utils.showToast('请输入网址', 'warning');
+                return;
             }
+            if (!utils.isValidUrl(url)) {
+                utils.showToast('请输入有效的网址', 'warning');
+                return;
+            }
+            // 创建仅包含链接的书签
+            this.pendingBookmark = {
+                title: new URL(url).hostname,
+                url: url,
+                content: '',
+                textContent: '',
+                excerpt: '',
+                favicon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`
+            };
+            utils.showToast('链接已保存，点击"保存"完成添加', 'success');
+            document.getElementById('fetchStatus').className = 'fetch-status success';
+            document.getElementById('fetchStatus').innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                链接已准备就绪
+            `;
+            document.getElementById('fetchStatus').style.display = 'block';
         });
 
         // 保存内容
@@ -1175,19 +1207,13 @@ class KnowledgeBaseApp {
 
         const statusEl = document.getElementById('fetchStatus');
         const useProxy = document.getElementById('useCorsProxy').checked;
-        const proxyType = useProxy ? document.getElementById('corsProxySelect').value : null;
-        const customProxy = document.getElementById('customCorsProxy').value.trim();
 
         statusEl.className = 'fetch-status loading';
         statusEl.textContent = '正在获取网页内容...';
         statusEl.style.display = 'block';
 
         try {
-            const result = await scraper.scrape(url, {
-                useProxy,
-                proxyType,
-                customProxyUrl: customProxy || null
-            });
+            const result = await scraper.scrape(url, { useProxy });
 
             if (result.success) {
                 statusEl.className = 'fetch-status success';
@@ -1209,12 +1235,19 @@ class KnowledgeBaseApp {
                         <line x1="15" y1="9" x2="9" y2="15"></line>
                         <line x1="9" y1="9" x2="15" y2="15"></line>
                     </svg>
-                    获取失败：${result.error}
+                    获取失败：${result.error}，请尝试"手动输入"或"仅保存链接"
                 `;
             }
         } catch (error) {
             statusEl.className = 'fetch-status error';
-            statusEl.textContent = `获取失败：${error.message}`;
+            statusEl.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                获取失败：${error.message}，请尝试"手动输入"或"仅保存链接"
+            `;
         }
     }
 
@@ -1228,12 +1261,20 @@ class KnowledgeBaseApp {
         this.selectedFiles = [];
         this.selectedTags = [];
         this.pendingBookmark = null;
+        this.isManualMode = false;
         
         document.getElementById('uploadList').innerHTML = '';
         document.getElementById('bookmarkUrl').value = '';
         document.getElementById('fetchStatus').style.display = 'none';
         document.getElementById('noteTitle').value = '';
         document.getElementById('noteContent').value = '';
+        
+        // 重置手动输入模式
+        document.getElementById('manualInputMode').classList.add('hidden');
+        document.getElementById('autoFetchMode').classList.remove('hidden');
+        document.getElementById('manualBookmarkUrl').value = '';
+        document.getElementById('manualBookmarkTitle').value = '';
+        document.getElementById('manualBookmarkContent').value = '';
         
         // 渲染标签
         this.renderNoteTags();
@@ -1361,29 +1402,67 @@ class KnowledgeBaseApp {
      * 保存网页收藏
      */
     async saveBookmark() {
-        if (!this.pendingBookmark) {
-            utils.showToast('请先获取网页内容', 'warning');
-            return;
-        }
-
         const folderId = document.getElementById('contentFolder').value || null;
+        
+        // 检查是否是手动输入模式
+        const manualMode = document.getElementById('manualInputMode');
+        const isManual = !manualMode.classList.contains('hidden');
+        
+        if (isManual) {
+            // 手动输入模式
+            const url = document.getElementById('manualBookmarkUrl').value.trim();
+            const title = document.getElementById('manualBookmarkTitle').value.trim();
+            const content = document.getElementById('manualBookmarkContent').value.trim();
+            
+            if (!url) {
+                utils.showToast('请输入网页 URL', 'warning');
+                return;
+            }
+            
+            if (!utils.isValidUrl(url)) {
+                utils.showToast('请输入有效的网址', 'warning');
+                return;
+            }
+            
+            const contentObj = {
+                type: 'bookmark',
+                title: title || new URL(url).hostname,
+                content: '',
+                textContent: content,
+                excerpt: content ? db.generateExcerpt(content, 150) : '',
+                sourceUrl: url,
+                imageUrl: '',
+                favicon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`,
+                folderId: folderId,
+                tags: [...this.selectedTags]
+            };
+            
+            await db.addContent(contentObj);
+            utils.showToast('网页已收藏', 'success');
+        } else {
+            // 自动获取模式
+            if (!this.pendingBookmark) {
+                utils.showToast('请先获取网页内容，或使用"手动输入"/"仅保存链接"', 'warning');
+                return;
+            }
 
-        // 构建完整的内容对象
-        const content = {
-            type: 'bookmark',
-            title: this.pendingBookmark.title || '无标题',
-            content: this.pendingBookmark.content || '',          // 原始HTML内容
-            textContent: this.pendingBookmark.textContent || '',  // 清理后的纯文本（新增）
-            excerpt: this.pendingBookmark.excerpt || db.generateExcerpt(this.pendingBookmark.textContent || this.pendingBookmark.content || '', 150),
-            sourceUrl: this.pendingBookmark.sourceUrl || '',
-            imageUrl: this.pendingBookmark.imageUrl || '',
-            markdown: this.pendingBookmark.markdown || '',         // 保留Markdown版本（可选）
-            folderId: folderId,
-            tags: [...this.selectedTags]
-        };
+            const content = {
+                type: 'bookmark',
+                title: this.pendingBookmark.title || '无标题',
+                content: this.pendingBookmark.content || '',
+                textContent: this.pendingBookmark.textContent || '',
+                excerpt: this.pendingBookmark.excerpt || db.generateExcerpt(this.pendingBookmark.textContent || this.pendingBookmark.content || '', 150),
+                sourceUrl: this.pendingBookmark.sourceUrl || '',
+                imageUrl: this.pendingBookmark.imageUrl || '',
+                favicon: this.pendingBookmark.favicon || '',
+                markdown: this.pendingBookmark.markdown || '',
+                folderId: folderId,
+                tags: [...this.selectedTags]
+            };
 
-        await db.addContent(content);
-        utils.showToast('网页已收藏', 'success');
+            await db.addContent(content);
+            utils.showToast('网页已收藏', 'success');
+        }
         
         await this.refreshData();
         utils.hideModal('addContentModal');
