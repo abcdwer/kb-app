@@ -26,6 +26,9 @@ class KnowledgeBaseApp {
             types: ['document', 'bookmark', 'note']
         };
         
+        // 快速编辑模式
+        this.isQuickEditMode = false;
+        
         this.init();
     }
 
@@ -576,6 +579,279 @@ class KnowledgeBaseApp {
                 this.confirmDeleteContent(this.currentContent);
             }
         });
+
+        // 快速编辑按钮
+        document.getElementById('quickEditBtn').addEventListener('click', () => {
+            if (this.currentContent) {
+                this.toggleQuickEdit();
+            }
+        });
+
+        // 快速编辑工具栏按钮
+        this.bindQuickEditToolbar();
+    }
+
+    /**
+     * 绑定快速编辑工具栏
+     */
+    bindQuickEditToolbar() {
+        const toolbar = document.getElementById('quickEditToolbar');
+        const previewContent = document.getElementById('previewContent');
+
+        // 工具栏按钮
+        toolbar.querySelectorAll('.quick-edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                this.applyQuickEditFormat(action);
+            });
+        });
+
+        // 保存按钮
+        document.getElementById('saveQuickEditBtn').addEventListener('click', () => {
+            this.saveQuickEdit();
+        });
+
+        // 取消按钮
+        document.getElementById('cancelQuickEditBtn').addEventListener('click', () => {
+            this.cancelQuickEdit();
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (!this.isQuickEditMode) return;
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        this.applyQuickEditFormat('bold');
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        this.applyQuickEditFormat('italic');
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        this.saveQuickEdit();
+                        break;
+                    case 'Escape':
+                        e.preventDefault();
+                        this.cancelQuickEdit();
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
+     * 切换快速编辑模式
+     */
+    toggleQuickEdit() {
+        // 只对网页类型启用快速编辑
+        if (!this.currentContent || this.currentContent.type !== 'bookmark') {
+            utils.showToast('快速编辑仅支持网页收藏内容', 'warning');
+            return;
+        }
+
+        const toolbar = document.getElementById('quickEditToolbar');
+        const previewTextContent = document.getElementById('previewTextContent');
+
+        if (!previewTextContent) {
+            utils.showToast('无法进入编辑模式', 'error');
+            return;
+        }
+
+        this.isQuickEditMode = !this.isQuickEditMode;
+
+        if (this.isQuickEditMode) {
+            // 进入编辑模式
+            toolbar.classList.remove('hidden');
+            previewTextContent.contentEditable = 'true';
+            previewTextContent.classList.add('editing');
+            document.getElementById('quickEditBtn').classList.add('active');
+            
+            // 禁用其他按钮
+            document.getElementById('editBtn').disabled = true;
+            document.getElementById('moveBtn').disabled = true;
+            document.getElementById('tagManageBtn').disabled = true;
+            document.getElementById('deleteBtn').disabled = true;
+            
+            // 聚焦到编辑区域
+            previewTextContent.focus();
+        } else {
+            // 退出编辑模式
+            this.exitQuickEditMode();
+        }
+    }
+
+    /**
+     * 退出快速编辑模式
+     */
+    exitQuickEditMode() {
+        const toolbar = document.getElementById('quickEditToolbar');
+        const previewTextContent = document.getElementById('previewTextContent');
+
+        toolbar.classList.add('hidden');
+        if (previewTextContent) {
+            previewTextContent.contentEditable = 'false';
+            previewTextContent.classList.remove('editing');
+        }
+        document.getElementById('quickEditBtn').classList.remove('active');
+        
+        // 启用其他按钮
+        document.getElementById('editBtn').disabled = false;
+        document.getElementById('moveBtn').disabled = false;
+        document.getElementById('tagManageBtn').disabled = false;
+        document.getElementById('deleteBtn').disabled = false;
+        
+        this.isQuickEditMode = false;
+    }
+
+    /**
+     * 应用快速编辑格式
+     */
+    applyQuickEditFormat(action) {
+        const previewTextContent = document.getElementById('previewTextContent');
+        if (!previewTextContent) return;
+
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const selectedText = selection.toString();
+
+        if (!selectedText) {
+            // 没有选中文本时显示提示
+            utils.showToast('请先选中要格式化的文本', 'warning');
+            return;
+        }
+
+        let before = '';
+        let after = '';
+
+        switch (action) {
+            case 'bold':
+                before = '**';
+                after = '**';
+                break;
+            case 'italic':
+                before = '*';
+                after = '*';
+                break;
+            case 'strikethrough':
+                before = '~~';
+                after = '~~';
+                break;
+            case 'highlight':
+                before = '==';
+                after = '==';
+                break;
+            case 'clearFormat':
+                // 移除所有格式标记
+                this.clearQuickEditFormats(previewTextContent, selection);
+                return;
+        }
+
+        // 应用格式
+        const formattedText = before + selectedText + after;
+        
+        // 创建新文本节点替换选中内容
+        const textNode = document.createTextNode(formattedText);
+        range.deleteContents();
+        range.insertNode(textNode);
+        
+        // 选中格式化的文本
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
+    }
+
+    /**
+     * 清除快速编辑格式
+     */
+    clearQuickEditFormats(container, selection) {
+        if (!selection.rangeCount) return;
+        
+        const range = selection.getRangeAt(0);
+        const selectedText = selection.toString();
+        
+        // 移除格式标记
+        let cleanedText = selectedText
+            .replace(/\*\*(.+?)\*\*/g, '$1')  // 粗体
+            .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '$1')  // 斜体
+            .replace(/~~(.+?)~~/g, '$1')  // 删除线
+            .replace(/==(.+?)==/g, '$1');  // 高亮
+
+        // 创建新文本节点替换
+        const textNode = document.createTextNode(cleanedText);
+        range.deleteContents();
+        range.insertNode(textNode);
+        
+        // 选中清理后的文本
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
+    }
+
+    /**
+     * 保存快速编辑
+     */
+    async saveQuickEdit() {
+        if (!this.currentContent) return;
+
+        const previewTextContent = document.getElementById('previewTextContent');
+        if (!previewTextContent) return;
+
+        try {
+            // 获取编辑后的纯文本（包含格式标记）
+            let editedText = previewTextContent.innerText || previewTextContent.textContent;
+            
+            // 清理多余的空白字符
+            editedText = editedText.replace(/\s+/g, ' ').trim();
+
+            // 更新数据库
+            const updateData = {
+                textContent: editedText,
+                excerpt: editedText.substring(0, 150)
+            };
+
+            await db.updateContent(this.currentContent.id, updateData);
+
+            utils.showToast('保存成功', 'success');
+            
+            // 退出编辑模式
+            this.exitQuickEditMode();
+            
+            // 刷新数据并更新预览
+            await this.refreshData();
+            
+            // 更新当前内容引用
+            this.currentContent = this.contents.find(c => c.id === this.currentContent.id);
+            
+            // 重新渲染预览
+            const contentNotes = this.notes.filter(n => n.contentId === this.currentContent.id);
+            renderer.renderPreview(this.currentContent, contentNotes, this.tags);
+            
+        } catch (error) {
+            console.error('保存失败:', error);
+            utils.showToast('保存失败', 'error');
+        }
+    }
+
+    /**
+     * 取消快速编辑
+     */
+    cancelQuickEdit() {
+        // 退出编辑模式
+        this.exitQuickEditMode();
+        
+        // 重新渲染预览以恢复原始内容
+        if (this.currentContent) {
+            const contentNotes = this.notes.filter(n => n.contentId === this.currentContent.id);
+            renderer.renderPreview(this.currentContent, contentNotes, this.tags);
+        }
     }
 
     /**

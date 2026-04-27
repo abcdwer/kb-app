@@ -279,9 +279,9 @@ class Renderer {
                 }
                 
                 if (displayText && displayText.trim()) {
-                    // 分段显示文本内容
+                    // 分段显示文本内容 - 添加 contenteditable 属性用于快速编辑
                     const paragraphs = this.splitIntoParagraphs(displayText);
-                    html += `<div class="preview-text-content">`;
+                    html += `<div class="preview-text-content" id="previewTextContent" contenteditable="false">`;
                     
                     if (paragraphs.length > 0) {
                         paragraphs.slice(0, 15).forEach(p => {

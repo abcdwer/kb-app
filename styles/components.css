@@ -874,3 +874,120 @@ select {
 .gap-2 { gap: 8px; }
 .gap-3 { gap: 12px; }
 .gap-4 { gap: 16px; }
+
+
+/* ===== 快速编辑样式 ===== */
+
+/* 快速编辑工具栏 */
+.quick-edit-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quick-edit-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.quick-edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.quick-edit-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.quick-edit-btn:active {
+    background: var(--bg-active);
+}
+
+.quick-edit-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border-color);
+    margin: 0 8px;
+}
+
+.quick-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 预览文本内容编辑状态 */
+.preview-text-content.editing {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    min-height: 200px;
+}
+
+.preview-text-content.editing:focus {
+    outline-color: var(--primary-hover);
+}
+
+/* 快速编辑按钮激活状态 */
+#quickEditBtn.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+#quickEditBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 编辑模式下的格式显示（可选，用于预览格式标记） */
+.preview-text-content .format-bold {
+    font-weight: 700;
+}
+
+.preview-text-content .format-italic {
+    font-style: italic;
+}
+
+.preview-text-content .format-strikethrough {
+    text-decoration: line-through;
+}
+
+.preview-text-content .format-highlight {
+    background: var(--warning-light);
+    color: var(--warning);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* 暗色主题适配 */
+[data-theme="dark"] .quick-edit-toolbar {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .preview-text-content.editing {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] #quickEditBtn.active {
+    background: var(--primary-light);
+}
+
+[data-theme="dark"] .quick-edit-btn:hover {
+    background: var(--bg-hover);
+}
