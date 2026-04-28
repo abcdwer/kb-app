@@ -323,20 +323,23 @@ class Renderer {
                     const isMarkdown = content.markdown || rawContent.includes('```');
                     const isHtml = rawContent.includes('<') && rawContent.includes('>');
                     
+                    // 统一使用 previewTextContent 容器，支持快速编辑
+                    html += `<div class="preview-text-content" id="previewTextContent" contenteditable="false">`;
+                    
                     if (isMarkdown && typeof marked !== 'undefined') {
-                        html += `<div class="markdown-body">${marked.parse(rawContent)}</div>`;
+                        // Markdown 渲染后放入编辑容器
+                        html += marked.parse(rawContent);
                     } else if (isHtml) {
-                        const cleanHtml = this.sanitizeHtml(rawContent);
-                        html += `<div class="markdown-body">${cleanHtml}</div>`;
+                        // HTML 清理后放入编辑容器
+                        html += this.sanitizeHtml(rawContent);
                     } else {
-                        // 纯文本 - 支持快速编辑
+                        // 纯文本
                         const paragraphs = rawContent.split(/\n\n+/).filter(p => p && p.trim());
-                        html += `<div class="preview-text-content" id="previewTextContent" contenteditable="false">`;
                         paragraphs.forEach(p => {
                             html += `<p>${utils.escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
                         });
-                        html += `</div>`;
                     }
+                    html += `</div>`;
                 } else {
                     html += `<div class="preview-empty">暂无内容</div>`;
                 }

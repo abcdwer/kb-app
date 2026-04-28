@@ -837,17 +837,24 @@ class KnowledgeBaseApp {
         if (!previewTextContent) return;
 
         try {
-            // 获取编辑后的纯文本（包含格式标记）
-            let editedText = previewTextContent.innerText || previewTextContent.textContent;
+            // 获取编辑后的 HTML 内容
+            const editedHtml = previewTextContent.innerHTML;
             
-            // 清理多余的空白字符
-            editedText = editedText.replace(/\s+/g, ' ').trim();
+            // 获取纯文本内容
+            const editedText = previewTextContent.innerText || previewTextContent.textContent;
+            const cleanedText = editedText.replace(/\s+/g, ' ').trim();
 
-            // 更新数据库
+            // 更新数据库 - 同时更新 content（HTML）和 textContent（纯文本）
             const updateData = {
-                textContent: editedText,
-                excerpt: editedText.substring(0, 150)
+                content: editedHtml,           // 存储编辑后的 HTML
+                textContent: cleanedText,      // 存储纯文本用于搜索和摘要
+                excerpt: cleanedText.substring(0, 150)
             };
+
+            // 如果原来是 Markdown 格式，清除标记
+            if (this.currentContent.markdown) {
+                updateData.markdown = false;
+            }
 
             await db.updateContent(this.currentContent.id, updateData);
 
