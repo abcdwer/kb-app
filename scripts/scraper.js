@@ -225,13 +225,33 @@ class WebScraper {
         } catch (error) {
             console.warn('页面解析失败，降级为纯文本提取:', error.message);
             
-            // 降级方案：直接提取纯文本
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            const textContent = (tempDiv.textContent || tempDiv.innerText || '').replace(/\s+/g, ' ').trim();
+            // 降级方案：使用正则提取纯文本，避免innerHTML解析
+            let textContent = html
+                // 移除script和style标签及其内容
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                // 移除所有HTML标签
+                .replace(/<[^>]+>/g, ' ')
+                // 解码常见HTML实体
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                // 清理多余空白
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            // 尝试提取标题
+            let title = '无标题';
+            const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+            if (titleMatch && titleMatch[1]) {
+                title = titleMatch[1].trim();
+            }
             
             return {
-                title: '无标题',
+                title,
                 content: '',
                 textContent: textContent,
                 excerpt: textContent.substring(0, 150),
@@ -363,10 +383,13 @@ class WebScraper {
             return doc.body.innerHTML;
         } catch (error) {
             console.warn('HTML清理失败，降级为纯文本:', error.message);
-            // 降级：返回纯文本
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            return tempDiv.textContent || tempDiv.innerText || html;
+            // 降级：使用正则移除HTML标签，避免innerHTML解析
+            return html
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim() || html;
         }
     }
 
