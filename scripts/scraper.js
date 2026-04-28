@@ -170,52 +170,77 @@ class WebScraper {
      * 解析网页内容
      */
     parsePage(html, baseUrl = '') {
-        // 创建DOM解析器
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // 移除不需要的元素
-        const removeSelectors = [
-            'script', 'style', 'nav', 'footer', 'header', 'aside',
-            'iframe', 'noscript', 'svg', 'canvas', 'video', 'audio',
-            '[role="navigation"]', '[role="banner"]', '[role="contentinfo"]',
-            '.nav', '.footer', '.header', '.sidebar', '.menu', '.advertisement',
-            '.ad', '.ads', '.social', '.share', '.comment', '.comments'
-        ];
-        
-        removeSelectors.forEach(selector => {
-            doc.querySelectorAll(selector).forEach(el => el.remove());
-        });
+        try {
+            // 创建DOM解析器
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // 检查解析是否成功
+            if (!doc || !doc.body) {
+                throw new Error('DOM解析失败');
+            }
+            
+            // 移除不需要的元素
+            const removeSelectors = [
+                'script', 'style', 'nav', 'footer', 'header', 'aside',
+                'iframe', 'noscript', 'svg', 'canvas', 'video', 'audio',
+                '[role="navigation"]', '[role="banner"]', '[role="contentinfo"]',
+                '.nav', '.footer', '.header', '.sidebar', '.menu', '.advertisement',
+                '.ad', '.ads', '.social', '.share', '.comment', '.comments'
+            ];
+            
+            removeSelectors.forEach(selector => {
+                doc.querySelectorAll(selector).forEach(el => el.remove());
+            });
 
-        // 提取标题
-        const title = this.extractTitle(doc);
+            // 提取标题
+            const title = this.extractTitle(doc);
 
-        // 提取正文内容（原始HTML）
-        const content = this.extractContent(doc);
-        
-        // 提取纯文本内容（用于显示）
-        const textContent = this.extractTextContent(doc);
-        
-        // 提取描述和摘要
-        const description = this.extractDescription(doc);
-        const excerpt = this.generateExcerpt(textContent || description);
+            // 提取正文内容（原始HTML）
+            const content = this.extractContent(doc);
+            
+            // 提取纯文本内容（用于显示）
+            const textContent = this.extractTextContent(doc);
+            
+            // 提取描述和摘要
+            const description = this.extractDescription(doc);
+            const excerpt = this.generateExcerpt(textContent || description);
 
-        // 提取图片
-        const images = this.extractImages(doc, baseUrl);
+            // 提取图片
+            const images = this.extractImages(doc, baseUrl);
 
-        // 提取图标
-        const favicon = this.extractFavicon(doc, baseUrl);
+            // 提取图标
+            const favicon = this.extractFavicon(doc, baseUrl);
 
-        return {
-            title,
-            content,           // 原始HTML内容
-            textContent,       // 清理后的纯文本（新增）
-            excerpt,           // 干净的摘要（新增）
-            description,       // meta描述
-            images,
-            favicon,
-            url: baseUrl
-        };
+            return {
+                title,
+                content,           // 原始HTML内容
+                textContent,       // 清理后的纯文本（新增）
+                excerpt,           // 干净的摘要（新增）
+                description,       // meta描述
+                images,
+                favicon,
+                url: baseUrl
+            };
+        } catch (error) {
+            console.warn('页面解析失败，降级为纯文本提取:', error.message);
+            
+            // 降级方案：直接提取纯文本
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const textContent = (tempDiv.textContent || tempDiv.innerText || '').replace(/\s+/g, ' ').trim();
+            
+            return {
+                title: '无标题',
+                content: '',
+                textContent: textContent,
+                excerpt: textContent.substring(0, 150),
+                description: '',
+                images: [],
+                favicon: '',
+                url: baseUrl
+            };
+        }
     }
 
     /**
@@ -290,47 +315,59 @@ class WebScraper {
      * 清理HTML
      */
     cleanHtml(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // 移除不需要的属性
-        const allowedAttrs = ['href', 'src', 'alt', 'title', 'srcset', 'loading'];
-        doc.querySelectorAll('*').forEach(el => {
-            const attrs = [...el.attributes];
-            attrs.forEach(attr => {
-                if (!allowedAttrs.includes(attr.name) && !attr.name.startsWith('data-')) {
-                    el.removeAttribute(attr.name);
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            if (!doc || !doc.body) {
+                throw new Error('DOM解析失败');
+            }
+            
+            // 移除不需要的属性
+            const allowedAttrs = ['href', 'src', 'alt', 'title', 'srcset', 'loading'];
+            doc.querySelectorAll('*').forEach(el => {
+                const attrs = [...el.attributes];
+                attrs.forEach(attr => {
+                    if (!allowedAttrs.includes(attr.name) && !attr.name.startsWith('data-')) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+                
+                // 保留的标签
+                const allowedTags = [
+                    'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+                    'a', 'strong', 'em', 'b', 'i', 'u', 's',
+                    'code', 'pre', 'blockquote',
+                    'img', 'figure', 'figcaption',
+                    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                    'div', 'span', 'section', 'article'
+                ];
+                
+                if (!allowedTags.includes(el.tagName.toLowerCase())) {
+                    // 保留文本内容
+                    while (el.firstChild) {
+                        el.parentNode.insertBefore(el.firstChild, el);
+                    }
+                    el.remove();
                 }
             });
-            
-            // 保留的标签
-            const allowedTags = [
-                'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                'ul', 'ol', 'li', 'dl', 'dt', 'dd',
-                'a', 'strong', 'em', 'b', 'i', 'u', 's',
-                'code', 'pre', 'blockquote',
-                'img', 'figure', 'figcaption',
-                'table', 'thead', 'tbody', 'tr', 'th', 'td',
-                'div', 'span', 'section', 'article'
-            ];
-            
-            if (!allowedTags.includes(el.tagName.toLowerCase())) {
-                // 保留文本内容
-                while (el.firstChild) {
-                    el.parentNode.insertBefore(el.firstChild, el);
+
+            // 转换图片URL为绝对路径
+            doc.querySelectorAll('img').forEach(img => {
+                if (img.src && !img.src.startsWith('http')) {
+                    img.remove();
                 }
-                el.remove();
-            }
-        });
+            });
 
-        // 转换图片URL为绝对路径
-        doc.querySelectorAll('img').forEach(img => {
-            if (img.src && !img.src.startsWith('http')) {
-                img.remove();
-            }
-        });
-
-        return doc.body.innerHTML;
+            return doc.body.innerHTML;
+        } catch (error) {
+            console.warn('HTML清理失败，降级为纯文本:', error.message);
+            // 降级：返回纯文本
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            return tempDiv.textContent || tempDiv.innerText || html;
+        }
     }
 
     /**

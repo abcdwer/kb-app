@@ -679,9 +679,9 @@ class KnowledgeBaseApp {
      * 切换快速编辑模式
      */
     toggleQuickEdit() {
-        // 只对网页类型启用快速编辑
-        if (!this.currentContent || this.currentContent.type !== 'bookmark') {
-            utils.showToast('快速编辑仅支持网页收藏内容', 'warning');
+        // 只对网页和文档类型启用快速编辑
+        if (!this.currentContent || !['bookmark', 'document'].includes(this.currentContent.type)) {
+            utils.showToast('快速编辑仅支持网页收藏和上传文档内容', 'warning');
             return;
         }
 

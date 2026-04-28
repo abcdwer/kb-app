@@ -329,9 +329,9 @@ class Renderer {
                         const cleanHtml = this.sanitizeHtml(rawContent);
                         html += `<div class="markdown-body">${cleanHtml}</div>`;
                     } else {
-                        // 纯文本
+                        // 纯文本 - 支持快速编辑
                         const paragraphs = rawContent.split(/\n\n+/).filter(p => p && p.trim());
-                        html += `<div class="markdown-body">`;
+                        html += `<div class="preview-text-content" id="previewTextContent" contenteditable="false">`;
                         paragraphs.forEach(p => {
                             html += `<p>${utils.escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
                         });
