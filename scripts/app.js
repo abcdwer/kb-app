@@ -590,7 +590,7 @@ class KnowledgeBaseApp {
     bindPreviewActions() {
         document.getElementById('editBtn').addEventListener('click', () => {
             if (this.currentContent) {
-                this.showEditModal(this.currentContent);
+                this.toggleQuickEdit();
             }
         });
 
@@ -612,9 +612,10 @@ class KnowledgeBaseApp {
             }
         });
 
-        // 快速编辑按钮
-        document.getElementById('quickEditBtn').addEventListener('click', () => {
-            if (this.currentContent) {
+        // 预览区双击进入快速编辑模式
+        document.getElementById('previewContent').addEventListener('dblclick', (e) => {
+            // 只有不在编辑模式时才响应
+            if (!this.isQuickEditMode && this.currentContent) {
                 this.toggleQuickEdit();
             }
         });
@@ -700,10 +701,9 @@ class KnowledgeBaseApp {
             toolbar.classList.remove('hidden');
             previewTextContent.contentEditable = 'true';
             previewTextContent.classList.add('editing');
-            document.getElementById('quickEditBtn').classList.add('active');
+            document.getElementById('editBtn').classList.add('active');
             
             // 禁用其他按钮
-            document.getElementById('editBtn').disabled = true;
             document.getElementById('moveBtn').disabled = true;
             document.getElementById('tagManageBtn').disabled = true;
             document.getElementById('deleteBtn').disabled = true;
@@ -728,10 +728,9 @@ class KnowledgeBaseApp {
             previewTextContent.contentEditable = 'false';
             previewTextContent.classList.remove('editing');
         }
-        document.getElementById('quickEditBtn').classList.remove('active');
+        document.getElementById('editBtn').classList.remove('active');
         
         // 启用其他按钮
-        document.getElementById('editBtn').disabled = false;
         document.getElementById('moveBtn').disabled = false;
         document.getElementById('tagManageBtn').disabled = false;
         document.getElementById('deleteBtn').disabled = false;

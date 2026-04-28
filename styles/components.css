@@ -944,15 +944,10 @@ select {
     outline-color: var(--primary-hover);
 }
 
-/* 快速编辑按钮激活状态 */
-#quickEditBtn.active {
+/* 编辑按钮激活状态 */
+#editBtn.active {
     background: var(--primary-light);
     color: var(--primary);
-}
-
-#quickEditBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 /* 编辑模式下的格式显示（可选，用于预览格式标记） */
@@ -984,7 +979,7 @@ select {
     background: var(--bg-tertiary);
 }
 
-[data-theme="dark"] #quickEditBtn.active {
+[data-theme="dark"] #editBtn.active {
     background: var(--primary-light);
 }
 
