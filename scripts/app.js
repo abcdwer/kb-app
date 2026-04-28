@@ -622,6 +622,124 @@ class KnowledgeBaseApp {
 
         // 快速编辑工具栏按钮
         this.bindQuickEditToolbar();
+        
+        // 全屏预览编辑功能
+        this.bindFullscreenPreviewActions();
+    }
+    
+    /**
+     * 绑定全屏预览操作
+     */
+    bindFullscreenPreviewActions() {
+        const editBtn = document.getElementById('fullscreenEditBtn');
+        const toolbar = document.getElementById('fullscreenQuickEditToolbar');
+        const container = document.getElementById('fullscreenPreviewContent');
+        const saveBtn = document.getElementById('fullscreenSaveEditBtn');
+        const cancelBtn = document.getElementById('fullscreenCancelEditBtn');
+        
+        // 编辑按钮
+        editBtn.addEventListener('click', () => {
+            container.contentEditable = 'true';
+            container.focus();
+            toolbar.classList.remove('hidden');
+            editBtn.classList.add('hidden');
+        });
+        
+        // 保存
+        saveBtn.addEventListener('click', async () => {
+            const editedHtml = container.innerHTML;
+            const editedText = container.innerText || container.textContent;
+            
+            try {
+                await db.updateContent(this.currentContent.id, {
+                    content: editedHtml,
+                    textContent: editedText.replace(/\s+/g, ' ').trim(),
+                    excerpt: editedText.substring(0, 150)
+                });
+                
+                utils.showToast('保存成功', 'success');
+                
+                // 退出编辑模式
+                container.contentEditable = 'false';
+                toolbar.classList.add('hidden');
+                editBtn.classList.remove('hidden');
+                
+                // 刷新数据
+                await this.refreshData();
+                
+            } catch (error) {
+                utils.showToast('保存失败', 'error');
+            }
+        });
+        
+        // 取消
+        cancelBtn.addEventListener('click', () => {
+            container.contentEditable = 'false';
+            toolbar.classList.add('hidden');
+            editBtn.classList.remove('hidden');
+            
+            // 恢复原始内容
+            this.renderFullscreenContent(this.currentContent, container);
+        });
+        
+        // 工具栏格式按钮
+        toolbar.querySelectorAll('.quick-edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                this.applyFullscreenFormat(action);
+            });
+        });
+        
+        // 快捷键
+        container.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'b') {
+                    e.preventDefault();
+                    this.applyFullscreenFormat('bold');
+                } else if (e.key === 'i') {
+                    e.preventDefault();
+                    this.applyFullscreenFormat('italic');
+                } else if (e.key === 's') {
+                    e.preventDefault();
+                    saveBtn.click();
+                }
+            }
+            if (e.key === 'Escape') {
+                cancelBtn.click();
+            }
+        });
+    }
+    
+    /**
+     * 应用全屏预览格式
+     */
+    applyFullscreenFormat(action) {
+        const container = document.getElementById('fullscreenPreviewContent');
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        
+        const selectedText = selection.toString();
+        if (!selectedText) return;
+        
+        let formatted = '';
+        switch (action) {
+            case 'bold':
+                formatted = `<strong>${selectedText}</strong>`;
+                break;
+            case 'italic':
+                formatted = `<em>${selectedText}</em>`;
+                break;
+            case 'strikethrough':
+                formatted = `<s>${selectedText}</s>`;
+                break;
+            case 'highlight':
+                formatted = `<mark>${selectedText}</mark>`;
+                break;
+        }
+        
+        if (formatted) {
+            document.execCommand('insertHTML', false, formatted);
+        }
     }
 
     /**
@@ -1142,7 +1260,7 @@ class KnowledgeBaseApp {
                 const id = card.dataset.id;
                 const content = this.contents.find(c => c.id === id);
                 if (content) {
-                    this.showEditModal(content);
+                    this.showFullscreenPreview(content);
                 }
             });
         });
@@ -1502,6 +1620,81 @@ class KnowledgeBaseApp {
         
         await this.refreshData();
         utils.hideModal('addContentModal');
+    }
+
+    /**
+     * 显示全屏预览
+     */
+    showFullscreenPreview(content) {
+        this.currentContent = content;
+        
+        // 更新标题
+        document.getElementById('fullscreenPreviewTitle').textContent = content.title;
+        
+        // 渲染内容
+        const container = document.getElementById('fullscreenPreviewContent');
+        this.renderFullscreenContent(content, container);
+        
+        // 重置编辑状态
+        container.contentEditable = 'false';
+        document.getElementById('fullscreenQuickEditToolbar').classList.add('hidden');
+        document.getElementById('fullscreenEditBtn').classList.remove('hidden');
+        
+        utils.showModal('fullscreenPreviewModal');
+    }
+    
+    /**
+     * 渲染全屏预览内容
+     */
+    renderFullscreenContent(content, container) {
+        let html = '';
+        const rawContent = content.content || '';
+        const textContent = content.textContent || '';
+        
+        if (content.type === 'bookmark') {
+            let displayText = textContent;
+            if (!displayText && rawContent) {
+                displayText = renderer.extractTextFromHtml(rawContent);
+            }
+            
+            if (displayText && displayText.trim()) {
+                const paragraphs = displayText.split(/\n\n+/).filter(p => p && p.trim());
+                paragraphs.forEach(p => {
+                    html += `<p>${utils.escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
+                });
+            }
+            
+            if (content.sourceUrl) {
+                html += `
+                    <div style="margin-top: 24px; text-align: center;">
+                        <a href="${utils.escapeHtml(content.sourceUrl)}" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            查看原文
+                        </a>
+                    </div>
+                `;
+            }
+        } else if (content.type === 'document' || content.type === 'note') {
+            const isMarkdown = content.markdown || rawContent.includes('```');
+            const isHtml = rawContent.includes('<') && rawContent.includes('>');
+            
+            if (isMarkdown && typeof marked !== 'undefined') {
+                html = marked.parse(rawContent);
+            } else if (isHtml) {
+                html = renderer.sanitizeHtml(rawContent);
+            } else {
+                const paragraphs = rawContent.split(/\n\n+/).filter(p => p && p.trim());
+                paragraphs.forEach(p => {
+                    html += `<p>${utils.escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
+                });
+            }
+        }
+        
+        container.innerHTML = html || '<div class="preview-empty">暂无内容</div>';
     }
 
     /**
