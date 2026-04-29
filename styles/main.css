@@ -2228,16 +2228,6 @@ a:hover {
     outline-color: var(--primary-hover);
 }
 
-/* 全屏预览中的工具栏 */
-.fullscreen-preview-modal .quick-edit-toolbar {
-    position: sticky;
-    bottom: 0;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border-color);
-    margin-top: auto;
-    flex-shrink: 0;
-}
-
 /* 暗色主题 */
 [data-theme="dark"] .fullscreen-preview-modal .modal-backdrop {
     background: rgba(0, 0, 0, 0.8);

@@ -1021,3 +1021,45 @@ select {
 .link-btn:hover {
     text-decoration: underline;
 }
+
+/* 全屏预览编辑工具栏 */
+#fullscreenQuickEditToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#fullscreenQuickEditToolbar .quick-edit-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#fullscreenQuickEditToolbar .quick-edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+#fullscreenQuickEditToolbar .quick-edit-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+#fullscreenQuickEditToolbar .quick-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
