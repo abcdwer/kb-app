@@ -612,11 +612,10 @@ class KnowledgeBaseApp {
             }
         });
 
-        // 预览区双击进入快速编辑模式
+        // 预览区双击打开全屏预览
         document.getElementById('previewContent').addEventListener('dblclick', (e) => {
-            // 只有不在编辑模式时才响应
             if (!this.isQuickEditMode && this.currentContent) {
-                this.toggleQuickEdit();
+                this.showFullscreenPreview(this.currentContent);
             }
         });
 
