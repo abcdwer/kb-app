@@ -2074,7 +2074,7 @@ a:hover {
     background: rgba(0, 0, 0, 0.6);
 }
 
-.fullscreen-preview-content {
+.fullscreen-preview-modal .modal-content {
     width: 95vw;
     max-width: 1400px;
     height: 90vh;
@@ -2082,6 +2082,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     padding: 0;
+    overflow: hidden;
 }
 
 .fullscreen-preview-header {
@@ -2117,7 +2118,7 @@ a:hover {
     padding: 24px;
 }
 
-.fullscreen-preview-content {
+.fullscreen-preview-text {
     font-size: 1rem;
     line-height: 1.8;
     color: var(--text-primary);
@@ -2126,38 +2127,38 @@ a:hover {
 }
 
 /* 全屏预览中的内容样式 */
-.fullscreen-preview-content h1,
-.fullscreen-preview-content h2,
-.fullscreen-preview-content h3,
-.fullscreen-preview-content h4,
-.fullscreen-preview-content h5,
-.fullscreen-preview-content h6 {
+.fullscreen-preview-text h1,
+.fullscreen-preview-text h2,
+.fullscreen-preview-text h3,
+.fullscreen-preview-text h4,
+.fullscreen-preview-text h5,
+.fullscreen-preview-text h6 {
     margin-top: 1.5em;
     margin-bottom: 0.5em;
     font-weight: 600;
     line-height: 1.3;
 }
 
-.fullscreen-preview-content h1 { font-size: 2em; }
-.fullscreen-preview-content h2 { font-size: 1.75em; }
-.fullscreen-preview-content h3 { font-size: 1.5em; }
-.fullscreen-preview-content h4 { font-size: 1.25em; }
+.fullscreen-preview-text h1 { font-size: 2em; }
+.fullscreen-preview-text h2 { font-size: 1.75em; }
+.fullscreen-preview-text h3 { font-size: 1.5em; }
+.fullscreen-preview-text h4 { font-size: 1.25em; }
 
-.fullscreen-preview-content p {
+.fullscreen-preview-text p {
     margin-bottom: 1em;
 }
 
-.fullscreen-preview-content ul,
-.fullscreen-preview-content ol {
+.fullscreen-preview-text ul,
+.fullscreen-preview-text ol {
     margin-bottom: 1em;
     padding-left: 1.5em;
 }
 
-.fullscreen-preview-content li {
+.fullscreen-preview-text li {
     margin-bottom: 0.5em;
 }
 
-.fullscreen-preview-content blockquote {
+.fullscreen-preview-text blockquote {
     margin: 1em 0;
     padding: 1em 1.5em;
     border-left: 4px solid var(--primary);
@@ -2165,7 +2166,7 @@ a:hover {
     color: var(--text-secondary);
 }
 
-.fullscreen-preview-content code {
+.fullscreen-preview-text code {
     padding: 0.2em 0.5em;
     background: var(--bg-tertiary);
     border-radius: var(--radius-sm);
@@ -2173,7 +2174,7 @@ a:hover {
     font-size: 0.9em;
 }
 
-.fullscreen-preview-content pre {
+.fullscreen-preview-text pre {
     margin: 1.5em 0;
     padding: 1.5em;
     background: var(--bg-tertiary);
@@ -2181,41 +2182,41 @@ a:hover {
     overflow-x: auto;
 }
 
-.fullscreen-preview-content pre code {
+.fullscreen-preview-text pre code {
     padding: 0;
     background: none;
 }
 
-.fullscreen-preview-content img {
+.fullscreen-preview-text img {
     max-width: 100%;
     border-radius: var(--radius-md);
     margin: 1em 0;
 }
 
-.fullscreen-preview-content a {
+.fullscreen-preview-text a {
     color: var(--primary);
 }
 
-.fullscreen-preview-content table {
+.fullscreen-preview-text table {
     width: 100%;
     margin: 1.5em 0;
     border-collapse: collapse;
 }
 
-.fullscreen-preview-content th,
-.fullscreen-preview-content td {
+.fullscreen-preview-text th,
+.fullscreen-preview-text td {
     padding: 0.75em;
     border: 1px solid var(--border-color);
     text-align: left;
 }
 
-.fullscreen-preview-content th {
+.fullscreen-preview-text th {
     background: var(--bg-tertiary);
     font-weight: 600;
 }
 
 /* 全屏预览中的编辑模式 */
-.fullscreen-preview-content[contenteditable="true"] {
+.fullscreen-preview-text[contenteditable="true"] {
     outline: 2px solid var(--primary);
     outline-offset: 4px;
     background: var(--bg-secondary);
@@ -2223,7 +2224,7 @@ a:hover {
     padding: 16px;
 }
 
-.fullscreen-preview-content[contenteditable="true"]:focus {
+.fullscreen-preview-text[contenteditable="true"]:focus {
     outline-color: var(--primary-hover);
 }
 
