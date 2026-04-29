@@ -2074,15 +2074,15 @@ a:hover {
     background: rgba(0, 0, 0, 0.6);
 }
 
-.fullscreen-preview-modal .modal-content {
-    width: 95vw;
-    max-width: 1400px;
-    height: 90vh;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
+.fullscreen-preview-container {
+    width: 95vw !important;
+    max-width: 1400px !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
 .fullscreen-preview-header {
